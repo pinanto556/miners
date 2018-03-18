@@ -23,8 +23,9 @@
 
 
 #include <chrono>
-#include <cmath>
+#include <math.h>
 #include <memory.h>
+#include <stdio.h>
 
 #include "log/Log.h"
 #include "Options.h"
@@ -33,7 +34,7 @@
 
 inline const char *format(double h, char* buf, size_t size)
 {
-    if (std::isnormal(h)) {
+    if (isnormal(h)) {
         snprintf(buf, size, "%03.1f", h);
         return buf;
     }
@@ -77,7 +78,7 @@ double Hashrate::calc(size_t ms) const
 
     for (int i = 0; i < m_threads; ++i) {
         data = calc(i, ms);
-        if (std::isnormal(data)) {
+        if (isnormal(data)) {
             result += data;
         }
     }
@@ -152,7 +153,7 @@ void Hashrate::print()
     char num3[8];
     char num4[8];
 
-    LOG_INFO(Options::i()->colors() ? "\x1B[01;37mspeed\x1B[0m 10s/60s/15m \x1B[01;36m%s \x1B[22;36m%s %s \x1B[01;36mH/s\x1B[0m max: \x1B[01;36m%s H/s" : "speed 10s/60s/15m %s %s %s H/s max: %s H/s",
+    LOG_INFO(Options::i()->colors() ? "\x1B[01;37mspeed\x1B[0m 2.5s/60s/15m \x1B[01;36m%s \x1B[22;36m%s %s \x1B[01;36mH/s\x1B[0m max: \x1B[01;36m%s H/s" : "speed 2.5s/60s/15m %s %s %s H/s max: %s H/s",
              format(calc(ShortInterval),  num1, sizeof(num1)),
              format(calc(MediumInterval), num2, sizeof(num2)),
              format(calc(LargeInterval),  num3, sizeof(num3)),
@@ -170,7 +171,7 @@ void Hashrate::stop()
 void Hashrate::updateHighest()
 {
    double highest = calc(ShortInterval);
-   if (std::isnormal(highest) && highest > m_highest) {
+   if (isnormal(highest) && highest > m_highest) {
        m_highest = highest;
    }
 }

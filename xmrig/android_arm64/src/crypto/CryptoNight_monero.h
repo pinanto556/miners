@@ -5,6 +5,7 @@
  * Copyright 2014-2016 Wolf9466    <https://github.com/OhGodAPet>
  * Copyright 2016      Jay D Dee   <jayddee246@gmail.com>
  * Copyright 2017-2018 XMR-Stak    <https://github.com/fireice-uk>, <https://github.com/psychocrypt>
+ * Copyright 2018      Lee Clagett <https://github.com/vtnerd>
  * Copyright 2016-2018 XMRig       <https://github.com/xmrig>, <support@xmrig.com>
  *
  *   This program is free software: you can redistribute it and/or modify
@@ -21,41 +22,30 @@
  *   along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __WORKER_H__
-#define __WORKER_H__
+#ifndef __CRYPTONIGHT_MONERO_H__
+#define __CRYPTONIGHT_MONERO_H__
 
 
-#include <atomic>
-#include <stdint.h>
+// VARIANT ALTERATIONS
+#define VARIANT1_INIT(part) \
+    uint64_t tweak1_2_##part = 0; \
+    if (VARIANT > 0) { \
+        tweak1_2_##part = (*reinterpret_cast<const uint64_t*>(input + 35 + part * size) ^ \
+                          *(reinterpret_cast<const uint64_t*>(ctx->state##part) + 24)); \
+    }
+
+#define VARIANT1_1(p) \
+    if (VARIANT > 0) { \
+        const uint8_t tmp = reinterpret_cast<const uint8_t*>(p)[11]; \
+        static const uint32_t table = 0x75310; \
+        const uint8_t index = (((tmp >> 3) & 6) | (tmp & 1)) << 1; \
+        ((uint8_t*)(p))[11] = tmp ^ ((table >> index) & 0x30); \
+    }
+
+#define VARIANT1_2(p, part) \
+    if (VARIANT > 0) { \
+        (p) ^= tweak1_2_##part; \
+    }
 
 
-#include "interfaces/IWorker.h"
-
-
-struct cryptonight_ctx;
-class Handle;
-
-
-class Worker : public IWorker
-{
-public:
-    Worker(Handle *handle);
-    ~Worker();
-
-    inline uint64_t hashCount() const override { return m_hashCount.load(std::memory_order_relaxed); }
-    inline uint64_t timestamp() const override { return m_timestamp.load(std::memory_order_relaxed); }
-
-protected:
-    void storeStats();
-
-    cryptonight_ctx *m_ctx;
-    int m_id;
-    int m_threads;
-    std::atomic<uint64_t> m_hashCount;
-    std::atomic<uint64_t> m_timestamp;
-    uint64_t m_count;
-    uint64_t m_sequence;
-};
-
-
-#endif /* __WORKER_H__ */
+#endif /* __CRYPTONIGHT_MONERO_H__ */
